@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototipo SGIE - Atención Tutoral</title>
+    <style>
+        /* ============================================
+           VARIABLES Y ESTILOS GENERALES
+           ============================================ */
+        :root {
+            --azul-primario: #1a3a5c;
+            --azul-secundario: #2980b9;
+            --azul-claro: #ebf5fb;
+            --verde: #27ae60;
+            --amarillo: #f39c12;
+            --rojo: #e74c3c;
+            --gris-claro: #f4f6f7;
+            --gris-medio: #bdc3c7;
+            --gris-oscuro: #2c3e50;
+            --blanco: #ffffff;
+            --sombra: 0 2px 10px rgba(0,0,0,0.1);
+            --radio: 8px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gris-claro);
+            color: var(--gris-oscuro);
+            min-height: 100vh;
+        }
+
+        /* ============================================
+           ENCABEZADO
+           ============================================ */
+        header {
+            background: var(--azul-primario);
+            color: var(--blanco);
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--sombra);
+        }
+
+        header h1 { font-size: 1.2rem; font-weight: 600; }
+        header .usuario-info { font-size: 0.85rem; opacity: 0.9; margin-right: 15px; }
+
+        .btn-cerrar {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 16px;
+            border-radius: var(--radio);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+        .btn-cerrar:hover { background: rgba(255,255,255,0.3); }
+
+        /* ============================================
+           PANTALLAS
+           ============================================ */
+        .pantalla { display: none; max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .pantalla.activa { display: block; }
+
+        .tarjeta {
+            background: var(--blanco);
+            border-radius: var(--radio);
+            box-shadow: var(--sombra);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .tarjeta h2 {
+            color: var(--azul-primario);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid var(--azul-claro);
+            padding-bottom: 10px;
+        }
+
+        .tarjeta h3 { color: var(--azul-secundario); margin-bottom: 15px; font-size: 1.1rem; }
+
+        /* ============================================
+           LOGIN
+           ============================================ */
+        .login-contenedor { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+        .login-tarjeta {
+            background: var(--blanco);
+            border-radius: var(--radio);
+            box-shadow: var(--sombra);
+            padding: 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+        }
+        .login-tarjeta h2 { color: var(--azul-primario); margin-bottom: 10px; border: none; padding: 0; }
+        .login-tarjeta p { color: var(--gris-medio); margin-bottom: 30px; font-size: 0.9rem; }
+        .login-tarjeta .logo-sgie { font-size: 3rem; margin-bottom: 15px; }
+
+        /* ============================================
+           BOTONES
+           ============================================ */
+        .btn {
+            display: inline-block; padding: 10px 24px; border: none; border-radius: var(--radio);
+            font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-primario { background: var(--azul-secundario); color: var(--blanco); }
+        .btn-primario:hover { background: var(--azul-primario); }
+        .btn-exito { background: var(--verde); color: var(--blanco); }
+        .btn-exito:hover { background: #219a52; }
+        .btn-secundario { background: var(--gris-medio); color: var(--gris-oscuro); }
+        .btn-peligro { background: var(--rojo); color: var(--blanco); }
+        .btn-grande { padding: 15px 40px; font-size: 1.1rem; }
+        .btn-grupo { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+        /* ============================================
+           FORMULARIOS
+           ============================================ */
+        .form-grupo { margin-bottom: 18px; }
+        .form-grupo label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--azul-primario); font-size: 0.9rem; }
+        .form-grupo input, .form-grupo textarea, .form-grupo select {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--gris-medio); border-radius: var(--radio);
+            font-size: 0.95rem; font-family: inherit; transition: border-color 0.2s;
+        }
+        .form-grupo input:focus, .form-grupo textarea:focus, .form-grupo select:focus {
+            outline: none; border-color: var(--azul-secundario); box-shadow: 0 0 0 3px rgba(41,128,185,0.15);
+        }
+        .form-grupo textarea { resize: vertical; min-height: 80px; }
+        .form-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        /* ============================================
+           TABLA
+           ============================================ */
+        .tabla-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: var(--azul-primario); color: var(--blanco); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:hover { background: var(--azul-claro); }
+
+        /* ============================================
+           SEMÁFORO
+           ============================================ */
+        .semaforo {
+            display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
+            border-radius: 20px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;
+        }
+        .semaforo .punto { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+        .semaforo-verde { background: #eafaf1; color: var(--verde); }
+        .semaforo-verde .punto { background: var(--verde); }
+        .semaforo-amarillo { background: #fef9e7; color: #b7950b; }
+        .semaforo-amarillo .punto { background: var(--amarillo); }
+        .semaforo-rojo { background: #fdedec; color: var(--rojo); }
+        .semaforo-rojo .punto { background: var(--rojo); }
+
+        /* ============================================
+           SELECTOR DE TIPO
+           ============================================ */
+        .selector-tipo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .tipo-opcion {
+            border: 2px solid var(--gris-medio); border-radius: var(--radio); padding: 30px;
+            text-align: center; cursor: pointer; transition: all 0.2s;
+        }
+        .tipo-opcion:hover { border-color: var(--azul-secundario); background: var(--azul-claro); }
+        .tipo-opcion.seleccionado { border-color: var(--azul-secundario); background: var(--azul-claro); box-shadow: 0 0 0 3px rgba(41,128,185,0.2); }
+        .tipo-opcion .icono { font-size: 2.5rem; margin-bottom: 10px; }
+        .tipo-opcion h3 { margin-bottom: 5px; }
+        .tipo-opcion p { font-size: 0.85rem; color: var(--gris-medio); }
+
+        /* ============================================
+           SESIONES Y ASISTENCIA
+           ============================================ */
+        .sesion-item { background: var(--gris-claro); border-radius: var(--radio); padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--azul-secundario); }
+        .asistencia-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
+        .asistencia-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--gris-claro); border-radius: var(--radio); }
+        .asistencia-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .asistencia-item label { cursor: pointer; font-size: 0.9rem; }
+
+        /* ============================================
+           NOTIFICACIONES Y PASOS
+           ============================================ */
+        .notificacion {
+            position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: var(--radio);
+            color: var(--blanco); font-weight: 600; box-shadow: var(--sombra); z-index: 1000; animation: deslizar 0.3s ease;
+        }
+        .notificacion.exito { background: var(--verde); }
+        .notificacion.info { background: var(--azul-secundario); }
+        @keyframes deslizar { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .pasos-barra { display: flex; justify-content: center; gap: 5px; margin-bottom: 25px; }
+        .paso-indicador {
+            width: 35px; height: 35px; border-radius: 50%; background: var(--gris-medio); color: var(--blanco);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;
+        }
+        .paso-indicador.activo { background: var(--azul-secundario); }
+
+        @media (max-width: 600px) {
+            .form-fila, .selector-tipo { grid-template-columns: 1fr; }
+            header { flex-direction: column; gap: 10px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ENCABEZADO (oculto hasta login) -->
+    <header id="encabezado" style="display:none;">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <h1>📋 SGIE - Atención Tutoral (Prototipo)</h1>
+            <span class="usuario-info">DTI: Óscar Cárdenas | Academia de Música</span>
+        </div>
+        <button class="btn-cerrar" onclick="cerrarSesion()">🚪 Cerrar sesión / Volver al inicio</button>
+    </header>
+
+    <!-- PANTALLA 1: LOGIN SIMULADO -->
+    <div id="pantalla-login" class="pantalla activa">
+        <div class="login-contenedor">
+            <div class="login-tarjeta">
+                <div class="logo-sgie">🎓</div>
+                <h2>SGIE</h2>
+                <p>Sistema de Gestión Institucional Educativa<br><em>Prototipo de Atención Tutoral</em></p>
+                <button class="btn btn-primario btn-grande" onclick="iniciarSesion()">Ingresar con cuenta institucional</button>
+                <p style="margin-top:15px; font-size:0.75rem; color:#aaa;">Este es un prototipo. No se solicitan datos reales.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 2: PANEL PRINCIPAL -->
+    <div id="pantalla-principal" class="pantalla">
+        <div class="tarjeta">
+            <h2>📋 Mis Tutorados</h2>
+            <p style="margin-bottom:15px; color:#7f8c8d;">Selecciona un estudiante para registrar seguimiento, o inicia una nueva planeación.</p>
+            <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
+                <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-planeacion')">➕ Nueva Planeación</button>
+                <button class="btn btn-exito" onclick="mostrarPantalla('pantalla-resumen')">📊 Ver Resumen General</button>
+            </div>
+            <div class="tabla-container">
+                <table>
+                    <thead><tr><th>Estudiante</th><th>Semestre</th><th>Sesiones</th><th>Asistencia</th><th>Semáforo</th><th>Acciones</th></tr></thead>
+                    <tbody id="tabla-tutorados"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 3: PLANEACIÓN -->
+    <div id="pantalla-planeacion" class="pantalla">
+        <div class="pasos-barra">
+            <div class="paso-indicador activo">1</div><div class="paso-indicador">2</div><div class="paso-indicador">3</div><div class="paso-indicador">4</div>
+        </div>
+        <div class="tarjeta">
+            <h2>📅 Nueva Planeación de Tutoría</h2>
+            <h3>Paso 1: Tipo de actividad</h3>
+            <div class="selector-tipo">
+                <div class="tipo-opcion" id="tipo-individual" onclick="seleccionarTipo('individual')">
+                    <div class="icono">👤</div><h3>Individual</h3><p>Sesión personalizada con un estudiante</p>
+                </div>
+                <div class="tipo-opcion" id="tipo-grupal" onclick="seleccionarTipo('grupal')">
+                    <div class="icono">👥</div><h3>Comité Tutoral</h3><p>Sesión grupal con todos los tutorados</p>
+                </div>
+            </div>
+            <h3>Paso 2: Registrar sesiones</h3>
+            <div id="contenedor-sesiones"></div>
+            <button class="btn btn-secundario" onclick="agregarSesion()" id="btn-agregar-sesion" style="margin-top:10px;">+ Agregar otra sesión</button>
+            <div class="btn-grupo">
+                <button class="btn btn-exito" onclick="guardarPlaneacion()">💾 Guardar Planeación</button>
+                <button class="btn btn-secundario" onclick="mostrarPantalla('pantalla-principal')">← Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 4: REGISTRO INDIVIDUAL -->
+    <div id="pantalla-registro" class="pantalla">
+        <div class="tarjeta">
+            <h2 id="titulo-registro">📝 Registro de Seguimiento</h2>
+            <h3>✅ Registro de Asistencias</h3>
+            <p style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">Marca las sesiones a las que asistió el estudiante.</p>
+            <div class="asistencia-grid" id="contenedor-asistencias"></div>
+            <hr style="margin: 25px 0; border: none; border-top: 1px solid #eee;">
+            
+            <h3>⚠️ Riesgo de Abandono Escolar</h3>
+            <div class="form-grupo">
+                <label>¿Se identifica algún factor de riesgo?</label>
+                <select id="select-riesgo">
+                    <option value="no">No se identifica riesgo</option>
+                    <option value="si">Sí, se identifica riesgo</option>
+                </select>
+            </div>
+            <div class="form-grupo" id="grupo-descripcion-riesgo" style="display:none;">
+                <label>Describe los aspectos identificados:</label>
+                <textarea id="descripcion-riesgo" placeholder="Ej: Problemas económicos, inasistencias recurrentes..."></textarea>
+            </div>
+            <hr style="margin: 25px 0; border: none; border-top: 1px solid #eee;">
+            
+            <h3>🔗 Recomendación de Canalización</h3>
+            <div class="form-grupo">
+                <label>¿Requiere canalización a algún servicio?</label>
+                <select id="select-canalizacion">
+                    <option value="no">No requiere canalización</option>
+                    <option value="psicologia">Psicología</option>
+                    <option value="trabajo-social">Trabajo Social</option>
+                    <option value="medico">Servicio Médico</option>
+                    <option value="academico">Asesoría Académica</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+            <div class="form-grupo" id="grupo-descripcion-canalizacion" style="display:none;">
+                <label>Observaciones de la canalización:</label>
+                <textarea id="descripcion-canalizacion" placeholder="Describe el motivo y las recomendaciones..."></textarea>
+            </div>
+            <hr style="margin: 25px 0; border: none; border-top: 1px solid #eee;">
+            
+            <h3>🚦 Semáforo (Automático)</h3>
+            <div style="text-align:center; padding:20px;">
+                <div id="semaforo-display" class="semaforo semaforo-verde" style="font-size:1.2rem; padding:12px 30px;">
+                    <span class="punto"></span> VERDE - Sin riesgo
+                </div>
+                <p style="font-size:0.8rem; color:#7f8c8d; margin-top:10px;">El color se calcula automáticamente según las reglas definidas.</p>
+            </div>
+            
+            <div class="btn-grupo" style="justify-content: space-between;">
+                <button class="btn btn-secundario" onclick="mostrarPantalla('pantalla-principal')">← Volver al listado</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-exito" onclick="guardarRegistro()">💾 Guardar</button>
+                    <button class="btn btn-primario" onclick="siguienteEstudiante()" id="btn-siguiente">Siguiente Estudiante →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 5: RESUMEN GENERAL -->
+    <div id="pantalla-resumen" class="pantalla">
+        <div class="tarjeta">
+            <h2>📊 Resumen General de Tutorados</h2>
+            <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
+                <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-principal')">← Volver al listado</button>
+                <button class="btn btn-peligro" onclick="reiniciarDatos()">🗑️ Reiniciar datos de prueba</button>
+            </div>
+            <div class="tabla-container">
+                <table>
+                    <thead><tr><th>Estudiante</th><th>Semestre</th><th>Total Sesiones</th><th>Asistencias</th><th>Inasistencias</th><th>% Asist.</th><th>Riesgo</th><th>Canalización</th><th>Semáforo</th></tr></thead>
+                    <tbody id="tabla-resumen"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        const datosIniciales = {
+            estudiantes: [
+                { id: 1, nombre: "Ana Melodía García", semestre: "3°", sesiones: [{fecha:"2026-09-08",descripcion:"Revisión de avance",objetivo:"Evaluar progreso"},{fecha:"2026-09-15",descripcion:"Orientación académica",objetivo:"Revisar calificaciones"},{fecha:"2026-09-22",descripcion:"Seguimiento emocional",objetivo:"Identificar estrés"},{fecha:"2026-09-29",descripcion:"Planeación proyecto final",objetivo:"Definir repertorio"}], asistencias: [true, true, false, null], riesgo: "no", descripcionRiesgo: "", canalizacion: "no", descripcionCanalizacion: "" },
+                { id: 2, nombre: "Carlos Ritmo López", semestre: "5°", sesiones: [{fecha:"2026-09-08",descripcion:"Comité tutoral grupal",objetivo:"Integración"},{fecha:"2026-09-15",descripcion:"Comité tutoral grupal",objetivo:"Técnicas de estudio"},{fecha:"2026-09-22",descripcion:"Comité tutoral grupal",objetivo:"Prevención abandono"},{fecha:"2026-09-29",descripcion:"Comité tutoral grupal",objetivo:"Cierre actividades"}], asistencias: [true, false, false, null], riesgo: "si", descripcionRiesgo: "Inasistencias recurrentes. Problemas de horario laboral.", canalizacion: "trabajo-social", descripcionCanalizacion: "Explorar opciones de apoyo." },
+                { id: 3, nombre: "Diana Armonía Martínez", semestre: "1°", sesiones: [{fecha:"2026-09-10",descripcion:"Bienvenida",objetivo:"Conocer expectativas"},{fecha:"2026-09-17",descripcion:"Revisión de adaptación",objetivo:"Verificar integración"}], asistencias: [true, true], riesgo: "no", descripcionRiesgo: "", canalizacion: "no", descripcionCanalizacion: "" },
+                { id: 4, nombre: "Eduardo Tempo Sánchez", semestre: "3°", sesiones: [{fecha:"2026-09-08",descripcion:"Revisión de instrumento",objetivo:"Evaluar técnica"},{fecha:"2026-09-15",descripcion:"Orientación vocacional",objetivo:"Explorar intereses"},{fecha:"2026-09-22",descripcion:"Seguimiento académico",objetivo:"Revisar materias en riesgo"},{fecha:"2026-09-29",descripcion:"Cierre semestral",objetivo:"Balance del semestre"}], asistencias: [false, false, false, null], riesgo: "si", descripcionRiesgo: "Tres materias con calificación menor a 6. Desmotivación.", canalizacion: "psicologia", descripcionCanalizacion: "Canalización por cuadro de desmotivación." }
+            ],
+            tipoPlaneacion: null,
+            indiceActual: 0
+        };
+
+        function cargarDatos() {
+            const guardados = localStorage.getItem('sgie_prototipo_datos');
+            return guardados ? JSON.parse(guardados) : JSON.parse(JSON.stringify(datosIniciales));
+        }
+        function guardarDatos(datos) { localStorage.setItem('sgie_prototipo_datos', JSON.stringify(datos)); }
+        let datos = cargarDatos();
+
+        function mostrarPantalla(id) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(id).classList.add('activa');
+            document.getElementById('encabezado').style.display = (id === 'pantalla-login') ? 'none' : 'flex';
+            if (id === 'pantalla-principal') renderizarTablaPrincipal();
+            if (id === 'pantalla-resumen') renderizarTablaResumen();
+        }
+
+        function iniciarSesion() {
+            mostrarNotificacion('Sesión iniciada correctamente', 'exito');
+            mostrarPantalla('pantalla-principal');
+        }
+
+        function cerrarSesion() {
+            mostrarPantalla('pantalla-login');
+        }
+
+        function renderizarTablaPrincipal() {
+            const tbody = document.getElementById('tabla-tutorados');
+            tbody.innerHTML = '';
+            datos.estudiantes.forEach((est, idx) => {
+                const semaforo = calcularSemaforo(est);
+                const asistencias = est.asistencias.filter(a => a === true).length;
+                const totalDefinidas = est.asistencias.filter(a => a !== null).length;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${est.nombre}</strong></td>
+                    <td>${est.semestre}</td>
+                    <td>${est.sesiones.length}</td>
+                    <td>${asistencias} / ${totalDefinidas}</td>
+                    <td>${renderizarSemaforoHTML(semaforo)}</td>
+                    <td><button class="btn btn-primario" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirRegistro(${idx})">Registrar</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let contadorSesiones = 0;
+        function seleccionarTipo(tipo) {
+            datos.tipoPlaneacion = tipo;
+            document.getElementById('tipo-individual').classList.toggle('seleccionado', tipo === 'individual');
+            document.getElementById('tipo-grupal').classList.toggle('seleccionado', tipo === 'grupal');
+            document.getElementById('btn-agregar-sesion').style.display = (tipo === 'grupal') ? 'none' : 'inline-block';
+            contadorSesiones = 0;
+            document.getElementById('contenedor-sesiones').innerHTML = '';
+            agregarSesion();
+        }
+
+        function agregarSesion() {
+            contadorSesiones++;
+            const div = document.createElement('div');
+            div.className = 'sesion-item';
+            div.innerHTML = `
+                <div class="form-fila">
+                    <div class="form-grupo"><label>Fecha de la sesión ${contadorSesiones}</label><input type="date" id="fecha-${contadorSesiones}"></div>
+                    <div class="form-grupo"><label>Objetivo</label><input type="text" id="objetivo-${contadorSesiones}" placeholder="Ej: Evaluar progreso"></div>
+                </div>
+                <div class="form-grupo"><label>Descripción de la sesión</label><textarea id="descripcion-${contadorSesiones}" placeholder="Describe la actividad planeada..."></textarea></div>
+            `;
+            document.getElementById('contenedor-sesiones').appendChild(div);
+        }
+
+        function guardarPlaneacion() {
+            if (!datos.tipoPlaneacion) { mostrarNotificacion('Selecciona un tipo de actividad primero', 'info'); return; }
+            const nuevasSesiones = [];
+            for (let i = 1; i <= contadorSesiones; i++) {
+                const fecha = document.getElementById(`fecha-${i}`)?.value;
+                const objetivo = document.getElementById(`objetivo-${i}`)?.value;
+                const descripcion = document.getElementById(`descripcion-${i}`)?.value;
+                if (fecha) nuevasSesiones.push({ fecha, descripcion: descripcion || '', objetivo: objetivo || '' });
+            }
+            if (nuevasSesiones.length === 0) { mostrarNotificacion('Ingresa al menos una sesión con fecha', 'info'); return; }
+
+            if (datos.tipoPlaneacion === 'grupal') {
+                datos.estudiantes.forEach(est => {
+                    nuevasSesiones.forEach(s => { est.sesiones.push({ ...s }); est.asistencias.push(null); });
+                });
+                mostrarNotificacion(`Planeación grupal guardada: ${nuevasSesiones.length} sesión(es) para todos`, 'exito');
+            } else {
+                const est = datos.estudiantes[0];
+                nuevasSesiones.forEach(s => { est.sesiones.push({ ...s }); est.asistencias.push(null); });
+                mostrarNotificacion(`Planeación individual guardada para ${est.nombre}`, 'exito');
+            }
+            guardarDatos(datos);
+            mostrarPantalla('pantalla-principal');
+        }
+
+        function abrirRegistro(indice) {
+            datos.indiceActual = indice;
+            renderizarRegistro();
+            mostrarPantalla('pantalla-registro');
+        }
+
+        function renderizarRegistro() {
+            const est = datos.estudiantes[datos.indiceActual];
+            document.getElementById('titulo-registro').textContent = `📝 Registro: ${est.nombre} (${est.semestre} semestre)`;
+            
+            const contAsist = document.getElementById('contenedor-asistencias');
+            contAsist.innerHTML = '';
+            est.sesiones.forEach((sesion, i) => {
+                const div = document.createElement('div');
+                div.className = 'asistencia-item';
+                const chequeado = est.asistencias[i] === true ? 'checked' : '';
+                div.innerHTML = `<input type="checkbox" id="asist-${i}" ${chequeado} onchange="datos.estudiantes[${datos.indiceActual}].asistencias[${i}] = this.checked; actualizarSemaforo();"><label for="asist-${i}">${sesion.fecha}</label>`;
+                contAsist.appendChild(div);
+            });
+
+            document.getElementById('select-riesgo').value = est.riesgo;
+            document.getElementById('descripcion-riesgo').value = est.descripcionRiesgo;
+            document.getElementById('grupo-descripcion-riesgo').style.display = (est.riesgo === 'si') ? 'block' : 'none';
+
+            document.getElementById('select-canalizacion').value = est.canalizacion;
+            document.getElementById('descripcion-canalizacion').value = est.descripcionCanalizacion;
+            document.getElementById('grupo-descripcion-canalizacion').style.display = (est.canalizacion !== 'no') ? 'block' : 'none';
+
+            actualizarSemaforo();
+
+            const btnSig = document.getElementById('btn-siguiente');
+            if (datos.indiceActual >= datos.estudiantes.length - 1) {
+                btnSig.textContent = '✅ Último estudiante';
+                btnSig.disabled = true;
+                btnSig.style.opacity = '0.5';
+            } else {
+                btnSig.textContent = 'Siguiente Estudiante →';
+                btnSig.disabled = false;
+                btnSig.style.opacity = '1';
+            }
+        }
+
+        document.getElementById('select-riesgo').addEventListener('change', function() {
+            document.getElementById('grupo-descripcion-riesgo').style.display = (this.value === 'si') ? 'block' : 'none';
+            actualizarSemaforo();
+        });
+        document.getElementById('select-canalizacion').addEventListener('change', function() {
+            document.getElementById('grupo-descripcion-canalizacion').style.display = (this.value !== 'no') ? 'block' : 'none';
+        });
+
+        function calcularSemaforo(estudiante) {
+            const totalSesiones = estudiante.asistencias.filter(a => a !== null).length;
+            const inasistencias = estudiante.asistencias.filter(a => a === false).length;
+            const porcentajeInasistencia = totalSesiones > 0 ? (inasistencias / totalSesiones) : 0;
+            if (porcentajeInasistencia >= 0.5) return 'rojo';
+            if (estudiante.riesgo === 'si') return 'amarillo';
+            return 'verde';
+        }
+
+        function renderizarSemaforoHTML(color) {
+            const textos = { verde: 'VERDE - Sin riesgo', amarillo: 'AMARILLO - Riesgo', rojo: 'ROJO - Crítico' };
+            return `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
+        }
+
+        function actualizarSemaforo() {
+            const est = datos.estudiantes[datos.indiceActual];
+            est.riesgo = document.getElementById('select-riesgo').value;
+            const color = calcularSemaforo(est);
+            document.getElementById('semaforo-display').className = `semaforo semaforo-${color}`;
+            document.getElementById('semaforo-display').innerHTML = `<span class="punto"></span> ${color.toUpperCase()} - ${color === 'verde' ? 'Sin riesgo' : color === 'amarillo' ? 'Riesgo identificado' : 'Crítico (≥50% inasistencias)'}`;
+        }
+
+        function guardarRegistro() {
+            const est = datos.estudiantes[datos.indiceActual];
+            est.riesgo = document.getElementById('select-riesgo').value;
+            est.descripcionRiesgo = document.getElementById('descripcion-riesgo').value;
+            est.canalizacion = document.getElementById('select-canalizacion').value;
+            est.descripcionCanalizacion = document.getElementById('descripcion-canalizacion').value;
+            guardarDatos(datos);
+            mostrarNotificacion(`Registro guardado para ${est.nombre}`, 'exito');
+        }
+
+        function siguienteEstudiante() {
+            guardarRegistro();
+            if (datos.indiceActual < datos.estudiantes.length - 1) {
+                datos.indiceActual++;
+                renderizarRegistro();
+                window.scrollTo(0, 0);
+                mostrarNotificacion(`Ahora registrando: ${datos.estudiantes[datos.indiceActual].nombre}`, 'info');
+            }
+        }
+
+        function renderizarTablaResumen() {
+            const tbody = document.getElementById('tabla-resumen');
+            tbody.innerHTML = '';
+            datos.estudiantes.forEach(est => {
+                const semaforo = calcularSemaforo(est);
+                const total = est.sesiones.length;
+                const asistencias = est.asistencias.filter(a => a === true).length;
+                const inasistencias = est.asistencias.filter(a => a === false).length;
+                const definidas = est.asistencias.filter(a => a !== null).length;
+                const porcentaje = definidas > 0 ? Math.round((asistencias / definidas) * 100) : 0;
+                const riesgoTexto = est.riesgo === 'si' ? '⚠️ Sí' : '✅ No';
+                const canalTexto = est.canalizacion === 'no' ? '—' : est.canalizacion.charAt(0).toUpperCase() + est.canalizacion.slice(1).replace('-', ' ');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><strong>${est.nombre}</strong></td><td>${est.semestre}</td><td>${total}</td><td>${asistencias}</td><td>${inasistencias}</td><td>${porcentaje}%</td><td>${riesgoTexto}</td><td>${canalTexto}</td><td>${renderizarSemaforoHTML(semaforo)}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function mostrarNotificacion(mensaje, tipo) {
+            const div = document.createElement('div');
+            div.className = `notificacion ${tipo}`;
+            div.textContent = mensaje;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        function reiniciarDatos() {
+            if (confirm('¿Reiniciar todos los datos a los valores de prueba originales?')) {
+                localStorage.removeItem('sgie_prototipo_datos');
+                datos = JSON.parse(JSON.stringify(datosIniciales));
+                renderizarTablaResumen();
+                mostrarNotificacion('Datos reiniciados correctamente', 'exito');
+            }
+        }
+
+        renderizarTablaPrincipal();
+    </script>
+</body>
+</html>
