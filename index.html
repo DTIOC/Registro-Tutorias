@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prototipo SGIE - Atención Tutoral</title>
     <style>
-        /* ============================================
-           VARIABLES Y ESTILOS GENERALES
-           ============================================ */
         :root {
             --azul-primario: #1a3a5c;
             --azul-secundario: #2980b9;
@@ -32,9 +29,6 @@
             min-height: 100vh;
         }
 
-        /* ============================================
-           ENCABEZADO
-           ============================================ */
         header {
             background: var(--azul-primario);
             color: var(--blanco);
@@ -60,9 +54,6 @@
         }
         .btn-cerrar:hover { background: rgba(255,255,255,0.3); }
 
-        /* ============================================
-           PANTALLAS
-           ============================================ */
         .pantalla { display: none; max-width: 1000px; margin: 30px auto; padding: 0 20px; }
         .pantalla.activa { display: block; }
 
@@ -84,9 +75,6 @@
 
         .tarjeta h3 { color: var(--azul-secundario); margin-bottom: 15px; font-size: 1.1rem; }
 
-        /* ============================================
-           LOGIN
-           ============================================ */
         .login-contenedor { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
         .login-tarjeta {
             background: var(--blanco);
@@ -101,9 +89,6 @@
         .login-tarjeta p { color: var(--gris-medio); margin-bottom: 30px; font-size: 0.9rem; }
         .login-tarjeta .logo-sgie { font-size: 3rem; margin-bottom: 15px; }
 
-        /* ============================================
-           BOTONES
-           ============================================ */
         .btn {
             display: inline-block; padding: 10px 24px; border: none; border-radius: var(--radio);
             font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-decoration: none;
@@ -118,9 +103,6 @@
         .btn-grande { padding: 15px 40px; font-size: 1.1rem; }
         .btn-grupo { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
 
-        /* ============================================
-           FORMULARIOS
-           ============================================ */
         .form-grupo { margin-bottom: 18px; }
         .form-grupo label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--azul-primario); font-size: 0.9rem; }
         .form-grupo input, .form-grupo textarea, .form-grupo select {
@@ -133,18 +115,12 @@
         .form-grupo textarea { resize: vertical; min-height: 80px; }
         .form-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
-        /* ============================================
-           TABLA
-           ============================================ */
         .tabla-container { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: var(--azul-primario); color: var(--blanco); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
         tr:hover { background: var(--azul-claro); }
 
-        /* ============================================
-           SEMÁFORO
-           ============================================ */
         .semaforo {
             display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
             border-radius: 20px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;
@@ -157,9 +133,6 @@
         .semaforo-rojo { background: #fdedec; color: var(--rojo); }
         .semaforo-rojo .punto { background: var(--rojo); }
 
-        /* ============================================
-           SELECTOR DE TIPO
-           ============================================ */
         .selector-tipo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
         .tipo-opcion {
             border: 2px solid var(--gris-medio); border-radius: var(--radio); padding: 30px;
@@ -171,18 +144,12 @@
         .tipo-opcion h3 { margin-bottom: 5px; }
         .tipo-opcion p { font-size: 0.85rem; color: var(--gris-medio); }
 
-        /* ============================================
-           SESIONES Y ASISTENCIA
-           ============================================ */
         .sesion-item { background: var(--gris-claro); border-radius: var(--radio); padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--azul-secundario); }
         .asistencia-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 10px; }
         .asistencia-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--gris-claro); border-radius: var(--radio); }
         .asistencia-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         .asistencia-item label { cursor: pointer; font-size: 0.9rem; }
 
-        /* ============================================
-           NOTIFICACIONES Y PASOS
-           ============================================ */
         .notificacion {
             position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: var(--radio);
             color: var(--blanco); font-weight: 600; box-shadow: var(--sombra); z-index: 1000; animation: deslizar 0.3s ease;
@@ -206,7 +173,6 @@
 </head>
 <body>
 
-    <!-- ENCABEZADO (oculto hasta login) -->
     <header id="encabezado" style="display:none;">
         <div style="display:flex; align-items:center; gap:15px;">
             <h1>📋 SGIE - Atención Tutoral (Prototipo)</h1>
@@ -215,7 +181,6 @@
         <button class="btn-cerrar" onclick="cerrarSesion()">🚪 Cerrar sesión / Volver al inicio</button>
     </header>
 
-    <!-- PANTALLA 1: LOGIN SIMULADO -->
     <div id="pantalla-login" class="pantalla activa">
         <div class="login-contenedor">
             <div class="login-tarjeta">
@@ -228,13 +193,12 @@
         </div>
     </div>
 
-    <!-- PANTALLA 2: PANEL PRINCIPAL -->
     <div id="pantalla-principal" class="pantalla">
         <div class="tarjeta">
             <h2>📋 Mis Tutorados</h2>
             <p style="margin-bottom:15px; color:#7f8c8d;">Selecciona un estudiante para registrar seguimiento, o inicia una nueva planeación.</p>
             <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
-                <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-planeacion')">➕ Nueva Planeación</button>
+                <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-planeacion')"> Nueva Planeación</button>
                 <button class="btn btn-exito" onclick="mostrarPantalla('pantalla-resumen')">📊 Ver Resumen General</button>
             </div>
             <div class="tabla-container">
@@ -246,7 +210,6 @@
         </div>
     </div>
 
-    <!-- PANTALLA 3: PLANEACIÓN -->
     <div id="pantalla-planeacion" class="pantalla">
         <div class="pasos-barra">
             <div class="paso-indicador activo">1</div><div class="paso-indicador">2</div><div class="paso-indicador">3</div><div class="paso-indicador">4</div>
@@ -272,7 +235,6 @@
         </div>
     </div>
 
-    <!-- PANTALLA 4: REGISTRO INDIVIDUAL -->
     <div id="pantalla-registro" class="pantalla">
         <div class="tarjeta">
             <h2 id="titulo-registro">📝 Registro de Seguimiento</h2>
@@ -331,24 +293,22 @@
         </div>
     </div>
 
-    <!-- PANTALLA 5: RESUMEN GENERAL -->
     <div id="pantalla-resumen" class="pantalla">
         <div class="tarjeta">
-            <h2>📊 Resumen General de Tutorados</h2>
+            <h2> Resumen General de Tutorados</h2>
             <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
                 <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-principal')">← Volver al listado</button>
                 <button class="btn btn-peligro" onclick="reiniciarDatos()">🗑️ Reiniciar datos de prueba</button>
             </div>
             <div class="tabla-container">
                 <table>
-                    <thead><tr><th>Estudiante</th><th>Semestre</th><th>Total Sesiones</th><th>Asistencias</th><th>Inasistencias</th><th>% Asist.</th><th>Riesgo</th><th>Canalización</th><th>Semáforo</th></tr></thead>
+                    <thead><tr><th>Estudiante</th><th>Semestre</th><th>Total Sesiones</th><th>Asistencias</th><th>Inasistencias</th><th>Pendientes</th><th>% Asist.</th><th>Riesgo</th><th>Canalización</th><th>Semáforo</th></tr></thead>
                     <tbody id="tabla-resumen"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
     <script>
         const datosIniciales = {
             estudiantes: [
@@ -391,13 +351,14 @@
             datos.estudiantes.forEach((est, idx) => {
                 const semaforo = calcularSemaforo(est);
                 const asistencias = est.asistencias.filter(a => a === true).length;
-                const totalDefinidas = est.asistencias.filter(a => a !== null).length;
+                const inasistencias = est.asistencias.filter(a => a === false).length;
+                const realizadas = asistencias + inasistencias;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${est.nombre}</strong></td>
                     <td>${est.semestre}</td>
                     <td>${est.sesiones.length}</td>
-                    <td>${asistencias} / ${totalDefinidas}</td>
+                    <td>${asistencias} / ${realizadas} registradas</td>
                     <td>${renderizarSemaforoHTML(semaforo)}</td>
                     <td><button class="btn btn-primario" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirRegistro(${idx})">Registrar</button></td>
                 `;
@@ -506,9 +467,11 @@
         });
 
         function calcularSemaforo(estudiante) {
-            const totalSesiones = estudiante.asistencias.filter(a => a !== null).length;
+            const asistencias = estudiante.asistencias.filter(a => a === true).length;
             const inasistencias = estudiante.asistencias.filter(a => a === false).length;
-            const porcentajeInasistencia = totalSesiones > 0 ? (inasistencias / totalSesiones) : 0;
+            const realizadas = asistencias + inasistencias;
+            const porcentajeInasistencia = realizadas > 0 ? (inasistencias / realizadas) : 0;
+            
             if (porcentajeInasistencia >= 0.5) return 'rojo';
             if (estudiante.riesgo === 'si') return 'amarillo';
             return 'verde';
@@ -550,17 +513,35 @@
         function renderizarTablaResumen() {
             const tbody = document.getElementById('tabla-resumen');
             tbody.innerHTML = '';
+            
             datos.estudiantes.forEach(est => {
                 const semaforo = calcularSemaforo(est);
                 const total = est.sesiones.length;
                 const asistencias = est.asistencias.filter(a => a === true).length;
                 const inasistencias = est.asistencias.filter(a => a === false).length;
-                const definidas = est.asistencias.filter(a => a !== null).length;
-                const porcentaje = definidas > 0 ? Math.round((asistencias / definidas) * 100) : 0;
+                const pendientes = est.asistencias.filter(a => a === null).length;
+                const realizadas = asistencias + inasistencias;
+                
+                // Calcular porcentaje solo sobre sesiones realizadas
+                const porcentaje = realizadas > 0 ? Math.round((asistencias / realizadas) * 100) : 0;
+                
                 const riesgoTexto = est.riesgo === 'si' ? '⚠️ Sí' : '✅ No';
-                const canalTexto = est.canalizacion === 'no' ? '—' : est.canalizacion.charAt(0).toUpperCase() + est.canalizacion.slice(1).replace('-', ' ');
+                const canalTexto = est.canalizacion === 'no' ? '—' : 
+                    est.canalizacion.charAt(0).toUpperCase() + est.canalizacion.slice(1).replace('-', ' ');
+                
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td><strong>${est.nombre}</strong></td><td>${est.semestre}</td><td>${total}</td><td>${asistencias}</td><td>${inasistencias}</td><td>${porcentaje}%</td><td>${riesgoTexto}</td><td>${canalTexto}</td><td>${renderizarSemaforoHTML(semaforo)}</td>`;
+                tr.innerHTML = `
+                    <td><strong>${est.nombre}</strong></td>
+                    <td>${est.semestre}</td>
+                    <td>${total}</td>
+                    <td>${asistencias}</td>
+                    <td>${inasistencias}</td>
+                    <td>${pendientes}</td>
+                    <td>${porcentaje}%</td>
+                    <td>${riesgoTexto}</td>
+                    <td>${canalTexto}</td>
+                    <td>${renderizarSemaforoHTML(semaforo)}</td>
+                `;
                 tbody.appendChild(tr);
             });
         }
