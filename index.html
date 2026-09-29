@@ -72,8 +72,20 @@
         .pasos-barra { display: flex; justify-content: center; gap: 5px; margin-bottom: 25px; }
         .paso-indicador { width: 35px; height: 35px; border-radius: 50%; background: var(--gris-medio); color: var(--blanco); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
         .paso-indicador.activo { background: var(--azul-secundario); }
-        .info-criterios { background: var(--azul-claro); padding: 15px; border-radius: var(--radio); margin: 15px 0; font-size: 0.85rem; color: var(--azul-primario); border-left: 4px solid var(--azul-secundario); }
-        @media (max-width: 600px) { .form-fila, .selector-tipo { grid-template-columns: 1fr; } header { flex-direction: column; gap: 10px; text-align: center; } }
+        
+        /* Estilos para las tablas de criterios del semáforo */
+        .tablas-criterios { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .tabla-criterio { border-radius: var(--radio); overflow: hidden; box-shadow: var(--sombra); }
+        .tabla-criterio h4 { padding: 12px 15px; margin: 0; font-size: 1rem; text-align: center; font-weight: 700; }
+        .tabla-criterio.inicio h4 { background: #d5f5e3; color: #1e8449; }
+        .tabla-criterio.final h4 { background: #d6eaf8; color: #1a5276; }
+        .tabla-criterio table { margin: 0; border: none; }
+        .tabla-criterio th { background: #5d6d7e; font-size: 0.8rem; padding: 10px 12px; }
+        .tabla-criterio td { padding: 10px 12px; font-size: 0.85rem; border-bottom: 1px solid #eee; }
+        .tabla-criterio tr:last-child td { border-bottom: none; }
+        .tabla-criterio tr:hover { background: #f8f9f9; }
+        
+        @media (max-width: 768px) { .tablas-criterios { grid-template-columns: 1fr; } .form-fila, .selector-tipo { grid-template-columns: 1fr; } header { flex-direction: column; gap: 10px; text-align: center; } }
     </style>
 </head>
 <body>
@@ -101,18 +113,57 @@
         <div class="tarjeta">
             <h2>📋 Mis Tutorados</h2>
             <p style="margin-bottom:15px; color:#7f8c8d;">Escribe el número de materias acreditadas para actualizar el semáforo automáticamente, o entra a "Detalles" para más información.</p>
+            
+            <!-- NUEVAS TABLAS DE CRITERIOS -->
+            <div class="tablas-criterios">
+                <div class="tabla-criterio inicio">
+                    <h4>📅 Inicio de semestre</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Semestre</th>
+                                <th>Verde (Al corriente)</th>
+                                <th>Amarillo (Rezago leve)</th>
+                                <th>Rojo (Rezago grave)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>2°</strong></td><td>5-6 materias</td><td>3-4 materias</td><td>≤2 materias</td></tr>
+                            <tr><td><strong>3°</strong></td><td>11-12 materias</td><td>9-10 materias</td><td>≤8 materias</td></tr>
+                            <tr><td><strong>4°</strong></td><td>17-18 materias</td><td>15-16 materias</td><td>≤14 materias</td></tr>
+                            <tr><td><strong>5°</strong></td><td>24-25 materias</td><td>22-23 materias</td><td>≤21 materias</td></tr>
+                            <tr><td><strong>6° (Egreso)</strong></td><td>30-32 materias</td><td>28-29 materias</td><td>≤27 materias</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="tabla-criterio final">
+                    <h4>🏁 Final de semestre</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Semestre</th>
+                                <th>Verde (Al corriente)</th>
+                                <th>Amarillo (Rezago leve)</th>
+                                <th>Rojo (Rezago grave)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>1°</strong></td><td>5-6 materias</td><td>3-4 materias</td><td>≤2 materias</td></tr>
+                            <tr><td><strong>2°</strong></td><td>11-12 materias</td><td>9-10 materias</td><td>≤8 materias</td></tr>
+                            <tr><td><strong>3°</strong></td><td>17-18 materias</td><td>15-16 materias</td><td>≤14 materias</td></tr>
+                            <tr><td><strong>4°</strong></td><td>24-25 materias</td><td>22-23 materias</td><td>≤21 materias</td></tr>
+                            <tr><td><strong>5°</strong></td><td>30-32 materias</td><td>28-29 materias</td><td>≤27 materias</td></tr>
+                            <tr><td><strong>6° (Egreso)</strong></td><td>38 materias</td><td>35-37 materias</td><td>≤34 materias</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- FIN NUEVAS TABLAS -->
+            
             <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
                 <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-planeacion')">➕ Nueva Planeación</button>
                 <button class="btn btn-exito" onclick="mostrarPantalla('pantalla-resumen')">📊 Ver Resumen General</button>
-            </div>
-            <div class="info-criterios">
-                <strong> Criterios del Semáforo:</strong><br>
-                <strong>1° semestre:</strong> Verde: 5-6 materias | Amarillo: 3-4 | Rojo: ≤2<br>
-                <strong>2° semestre:</strong> Verde: 11-12 | Amarillo: 9-10 | Rojo: ≤8<br>
-                <strong>3° semestre:</strong> Verde: 17-18 | Amarillo: 15-16 | Rojo: ≤14<br>
-                <strong>4° semestre:</strong> Verde: 24-25 | Amarillo: 22-23 | Rojo: ≤21<br>
-                <strong>5° semestre:</strong> Verde: 30-32 | Amarillo: 28-29 | Rojo: ≤27<br>
-                <strong>6° semestre (egreso):</strong> Verde: 38 | Amarillo: 35-37 | Rojo: ≤34
             </div>
             <div class="tabla-container">
                 <table>
@@ -162,7 +213,7 @@
         <div class="tarjeta">
             <h2 id="titulo-registro">📝 Registro de Seguimiento</h2>
             
-            <h3> Situación Académica</h3>
+            <h3>📚 Situación Académica</h3>
             <div class="form-grupo">
                 <label>Momento de evaluación:</label>
                 <select id="momento-evaluacion" onchange="actualizarSemaforo()">
@@ -182,7 +233,7 @@
             <div class="asistencia-grid" id="contenedor-asistencias"></div>
             <hr style="margin: 25px 0; border: none; border-top: 1px solid #eee;">
             
-            <h3>⚠️ Riesgo de Abandono Escolar</h3>
+            <h3>️ Riesgo de Abandono Escolar</h3>
             <div class="form-grupo">
                 <label>¿Se identifica algún factor de riesgo?</label>
                 <select id="select-riesgo">
@@ -234,10 +285,10 @@
 
     <div id="pantalla-resumen" class="pantalla">
         <div class="tarjeta">
-            <h2> Resumen General de Tutorados</h2>
+            <h2>📊 Resumen General de Tutorados</h2>
             <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
                 <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-principal')">← Volver al listado</button>
-                <button class="btn btn-peligro" onclick="reiniciarDatos()">🗑️ Reiniciar datos de prueba</button>
+                <button class="btn btn-peligro" onclick="reiniciarDatos()">️ Reiniciar datos de prueba</button>
             </div>
             <div class="tabla-container">
                 <table>
@@ -270,7 +321,6 @@
             indiceActual: 0
         };
 
-        // Función mejorada: detecta datos viejos y los reinicia automáticamente
         function cargarDatos() {
             const guardados = localStorage.getItem('sgie_prototipo_datos');
             if (guardados) {
@@ -319,7 +369,6 @@
             return `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
         }
 
-        // Función corregida: IDs únicos y addEventListener
         function renderizarTablaPrincipal() {
             const tbody = document.getElementById('tabla-tutorados');
             tbody.innerHTML = '';
@@ -350,7 +399,6 @@
                 `;
                 tbody.appendChild(tr);
                 
-                // Agregar eventos al input de materias
                 const inputMaterias = document.getElementById(`materias-${idx}`);
                 inputMaterias.addEventListener('change', function() {
                     actualizarMateriaEnTabla(idx, this.value);
@@ -359,7 +407,6 @@
                     actualizarMateriaEnTabla(idx, this.value);
                 });
                 
-                // Agregar evento al selector de momento
                 const selectMomento = document.getElementById(`momento-${idx}`);
                 selectMomento.addEventListener('change', function() {
                     actualizarMomentoEnTabla(idx, this.value);
@@ -462,7 +509,7 @@
 
         function renderizarRegistro() {
             const est = datos.estudiantes[datos.indiceActual];
-            document.getElementById('titulo-registro').textContent = ` Registro: ${est.nombre} (${est.semestre} semestre)`;
+            document.getElementById('titulo-registro').textContent = `📝 Registro: ${est.nombre} (${est.semestre} semestre)`;
             
             document.getElementById('momento-evaluacion').value = est.momento;
             document.getElementById('materias-acreditadas').value = est.materiasAcreditadas;
@@ -554,7 +601,7 @@
             datos.estudiantes.forEach(est => {
                 const semaforo = calcularSemaforo(est);
                 const asistencias = est.asistencias.filter(a => a === true).length;
-                const riesgoTexto = est.riesgo === 'si' ? '⚠️ Sí' : '✅ No';
+                const riesgoTexto = est.riesgo === 'si' ? '️ Sí' : '✅ No';
                 const canalTexto = est.canalizacion === 'no' ? '—' : est.canalizacion.charAt(0).toUpperCase() + est.canalizacion.slice(1).replace('-', ' ');
                 const momentoTexto = est.momento === 'inicio' ? 'Inicio' : 'Final';
                 
