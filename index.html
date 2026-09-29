@@ -72,6 +72,7 @@
         .pasos-barra { display: flex; justify-content: center; gap: 5px; margin-bottom: 25px; }
         .paso-indicador { width: 35px; height: 35px; border-radius: 50%; background: var(--gris-medio); color: var(--blanco); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
         .paso-indicador.activo { background: var(--azul-secundario); }
+        .info-criterios { background: var(--azul-claro); padding: 15px; border-radius: var(--radio); margin: 15px 0; font-size: 0.85rem; color: var(--azul-primario); border-left: 4px solid var(--azul-secundario); }
         @media (max-width: 600px) { .form-fila, .selector-tipo { grid-template-columns: 1fr; } header { flex-direction: column; gap: 10px; text-align: center; } }
     </style>
 </head>
@@ -104,12 +105,22 @@
                 <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-planeacion')">➕ Nueva Planeación</button>
                 <button class="btn btn-exito" onclick="mostrarPantalla('pantalla-resumen')">📊 Ver Resumen General</button>
             </div>
+            <div class="info-criterios">
+                <strong>📌 Criterios del Semáforo:</strong><br>
+                <strong>1° semestre:</strong> Verde: 5-6 materias | Amarillo: 3-4 | Rojo: ≤2<br>
+                <strong>2° semestre:</strong> Verde: 11-12 | Amarillo: 9-10 | Rojo: ≤8<br>
+                <strong>3° semestre:</strong> Verde: 17-18 | Amarillo: 15-16 | Rojo: ≤14<br>
+                <strong>4° semestre:</strong> Verde: 24-25 | Amarillo: 22-23 | Rojo: ≤21<br>
+                <strong>5° semestre:</strong> Verde: 30-32 | Amarillo: 28-29 | Rojo: ≤27<br>
+                <strong>6° semestre (egreso):</strong> Verde: 38 | Amarillo: 35-37 | Rojo: ≤34
+            </div>
             <div class="tabla-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Estudiante</th>
                             <th>Semestre</th>
+                            <th>Momento</th>
                             <th>Materias Acreditadas</th>
                             <th>Asistencia</th>
                             <th>Semáforo Académico</th>
@@ -134,7 +145,7 @@
                     <div class="icono">👤</div><h3>Individual</h3><p>Sesión personalizada con un estudiante</p>
                 </div>
                 <div class="tipo-opcion" id="tipo-grupal" onclick="seleccionarTipo('grupal')">
-                    <div class="icono">👥</div><h3>Grupal</h3><p>Sesión grupal con todos los tutorados</p>
+                    <div class="icono"></div><h3>Grupal</h3><p>Sesión grupal con todos los tutorados</p>
                 </div>
             </div>
             <h3>Paso 2: Registrar sesiones</h3>
@@ -152,6 +163,13 @@
             <h2 id="titulo-registro">📝 Registro de Seguimiento</h2>
             
             <h3>📚 Situación Académica</h3>
+            <div class="form-grupo">
+                <label>Momento de evaluación:</label>
+                <select id="momento-evaluacion" onchange="actualizarSemaforo()">
+                    <option value="inicio">Inicio de semestre (materias del semestre anterior)</option>
+                    <option value="final">Final de semestre (materias del semestre actual)</option>
+                </select>
+            </div>
             <div class="form-grupo">
                 <label>Materias acreditadas hasta el momento:</label>
                 <input type="number" id="materias-acreditadas" min="0" max="50" onchange="actualizarSemaforo()">
@@ -178,7 +196,7 @@
             </div>
             <hr style="margin: 25px 0; border: none; border-top: 1px solid #eee;">
             
-            <h3>🔗 Recomendación de Canalización</h3>
+            <h3> Recomendación de Canalización</h3>
             <div class="form-grupo">
                 <label>¿Requiere canalización a algún servicio?</label>
                 <select id="select-canalizacion">
@@ -201,7 +219,7 @@
                 <div id="semaforo-display" class="semaforo semaforo-verde" style="font-size:1.2rem; padding:12px 30px;">
                     <span class="punto"></span> VERDE - Al corriente
                 </div>
-                <p style="font-size:0.8rem; color:#7f8c8d; margin-top:10px;">Calculado según el % de materias acreditadas vs. las esperadas para su semestre.</p>
+                <p style="font-size:0.8rem; color:#7f8c8d; margin-top:10px;">Calculado según el número de materias acreditadas y el momento de evaluación.</p>
             </div>
             
             <div class="btn-grupo" style="justify-content: space-between;">
@@ -219,11 +237,11 @@
             <h2>📊 Resumen General de Tutorados</h2>
             <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
                 <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-principal')">← Volver al listado</button>
-                <button class="btn btn-peligro" onclick="reiniciarDatos()">🗑️ Reiniciar datos de prueba</button>
+                <button class="btn btn-peligro" onclick="reiniciarDatos()">️ Reiniciar datos de prueba</button>
             </div>
             <div class="tabla-container">
                 <table>
-                    <thead><tr><th>Estudiante</th><th>Semestre</th><th>Materias Acreditadas</th><th>Meta Mín.</th><th>% Avance</th><th>Asistencias</th><th>Riesgo</th><th>Canalización</th><th>Semáforo</th></tr></thead>
+                    <thead><tr><th>Estudiante</th><th>Semestre</th><th>Momento</th><th>Materias Acreditadas</th><th>Asistencias</th><th>Riesgo</th><th>Canalización</th><th>Semáforo</th></tr></thead>
                     <tbody id="tabla-resumen"></tbody>
                 </table>
             </div>
@@ -231,15 +249,22 @@
     </div>
 
     <script>
-        // Metas mínimas de materias acreditadas por semestre
-        const metasSemestre = { "1°": 4, "2°": 10, "3°": 16, "4°": 23, "5°": 30, "6°": 38 };
+        // Criterios exactos del semáforo por semestre y momento
+        const criteriosSemafaro = {
+            "1°": { inicio: { verde: [5, 6], amarillo: [3, 4], rojo: [0, 2] }, final: { verde: [5, 6], amarillo: [3, 4], rojo: [0, 2] } },
+            "2°": { inicio: { verde: [5, 6], amarillo: [3, 4], rojo: [0, 2] }, final: { verde: [11, 12], amarillo: [9, 10], rojo: [0, 8] } },
+            "3°": { inicio: { verde: [11, 12], amarillo: [9, 10], rojo: [0, 8] }, final: { verde: [17, 18], amarillo: [15, 16], rojo: [0, 14] } },
+            "4°": { inicio: { verde: [17, 18], amarillo: [15, 16], rojo: [0, 14] }, final: { verde: [24, 25], amarillo: [22, 23], rojo: [0, 21] } },
+            "5°": { inicio: { verde: [24, 25], amarillo: [22, 23], rojo: [0, 21] }, final: { verde: [30, 32], amarillo: [28, 29], rojo: [0, 27] } },
+            "6°": { inicio: { verde: [30, 32], amarillo: [28, 29], rojo: [0, 27] }, final: { verde: [38, 38], amarillo: [35, 37], rojo: [0, 34] } }
+        };
 
         const datosIniciales = {
             estudiantes: [
-                { id: 1, nombre: "Ana Melodía García", semestre: "3°", materiasAcreditadas: 15, sesiones: [{fecha:"2026-09-08",descripcion:"Revisión de avance",objetivo:"Evaluar progreso"}], asistencias: [true], riesgo: "no", descripcionRiesgo: "", canalizacion: "no", descripcionCanalizacion: "" },
-                { id: 2, nombre: "Carlos Ritmo López", semestre: "5°", materiasAcreditadas: 20, sesiones: [{fecha:"2026-09-08",descripcion:"Comité tutoral",objetivo:"Integración"}], asistencias: [false], riesgo: "si", descripcionRiesgo: "Rezago académico acumulado.", canalizacion: "academico", descripcionCanalizacion: "Plan de recuperación de materias." },
-                { id: 3, nombre: "Diana Armonía Martínez", semestre: "1°", materiasAcreditadas: 5, sesiones: [{fecha:"2026-09-10",descripcion:"Bienvenida",objetivo:"Conocer expectativas"}], asistencias: [true], riesgo: "no", descripcionRiesgo: "", canalizacion: "no", descripcionCanalizacion: "" },
-                { id: 4, nombre: "Eduardo Tempo Sánchez", semestre: "4°", materiasAcreditadas: 14, sesiones: [{fecha:"2026-09-08",descripcion:"Revisión de instrumento",objetivo:"Evaluar técnica"}], asistencias: [false], riesgo: "si", descripcionRiesgo: "Desmotivación y bajo rendimiento.", canalizacion: "psicologia", descripcionCanalizacion: "Canalización por cuadro de desmotivación." }
+                { id: 1, nombre: "Ana Melodía García", semestre: "3°", momento: "final", materiasAcreditadas: 17, sesiones: [{fecha:"2026-09-08",descripcion:"Revisión de avance",objetivo:"Evaluar progreso"}], asistencias: [true], riesgo: "no", descripcionRiesgo: "", canalizacion: "no", descripcionCanalizacion: "" },
+                { id: 2, nombre: "Carlos Ritmo López", semestre: "5°", momento: "inicio", materiasAcreditadas: 25, sesiones: [{fecha:"2026-09-08",descripcion:"Comité tutoral",objetivo:"Integración"}], asistencias: [false], riesgo: "si", descripcionRiesgo: "Rezago académico acumulado.", canalizacion: "academico", descripcionCanalizacion: "Plan de recuperación de materias." },
+                { id: 3, nombre: "Diana Armonía Martínez", semestre: "1°", momento: "final", materiasAcreditadas: 5, sesiones: [{fecha:"2026-09-10",descripcion:"Bienvenida",objetivo:"Conocer expectativas"}], asistencias: [true], riesgo: "no", descripcionRiesgo: "", canalizacion: "no", descripcionCanalizacion: "" },
+                { id: 4, nombre: "Eduardo Tempo Sánchez", semestre: "4°", momento: "final", materiasAcreditadas: 22, sesiones: [{fecha:"2026-09-08",descripcion:"Revisión de instrumento",objetivo:"Evaluar técnica"}], asistencias: [false], riesgo: "si", descripcionRiesgo: "Desmotivación y bajo rendimiento.", canalizacion: "psicologia", descripcionCanalizacion: "Canalización por cuadro de desmotivación." }
             ],
             tipoPlaneacion: null,
             indiceActual: 0
@@ -264,11 +289,12 @@
         function cerrarSesion() { mostrarPantalla('pantalla-login'); }
 
         function calcularSemaforo(estudiante) {
-            const meta = metasSemestre[estudiante.semestre] || 38;
-            const porcentaje = (estudiante.materiasAcreditadas / meta) * 100;
+            const criterios = criteriosSemafaro[estudiante.semestre][estudiante.momento];
+            const materias = estudiante.materiasAcreditadas;
             
-            if (porcentaje >= 90) return 'verde';
-            if (porcentaje >= 70) return 'amarillo';
+            if (materias >= criterios.verde[0] && materias <= criterios.verde[1]) return 'verde';
+            if (materias >= criterios.amarillo[0] && materias <= criterios.amarillo[1]) return 'amarillo';
+            if (materias >= criterios.rojo[0] && materias <= criterios.rojo[1]) return 'rojo';
             return 'rojo';
         }
 
@@ -281,7 +307,6 @@
             return `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
         }
 
-        // FUNCIÓN ACTUALIZADA: Campo editable directamente en la tabla principal
         function renderizarTablaPrincipal() {
             const tbody = document.getElementById('tabla-tutorados');
             tbody.innerHTML = '';
@@ -293,6 +318,12 @@
                 tr.innerHTML = `
                     <td><strong>${est.nombre}</strong></td>
                     <td>${est.semestre}</td>
+                    <td>
+                        <select onchange="actualizarMomentoEnTabla(${idx}, this.value)" style="padding: 5px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                            <option value="inicio" ${est.momento === 'inicio' ? 'selected' : ''}>Inicio</option>
+                            <option value="final" ${est.momento === 'final' ? 'selected' : ''}>Final</option>
+                        </select>
+                    </td>
                     <td>
                         <input type="number" 
                                value="${est.materiasAcreditadas}" 
@@ -308,12 +339,9 @@
             });
         }
 
-        // Nueva función para actualizar el dato y el semáforo desde la tabla principal
-        function actualizarMateriaEnTabla(indice, valor) {
-            datos.estudiantes[indice].materiasAcreditadas = parseInt(valor) || 0;
-            guardarDatos(datos); // Guarda el cambio inmediatamente
-            
-            // Recalcula y actualiza visualmente el semáforo de esa fila sin recargar
+        function actualizarMomentoEnTabla(indice, valor) {
+            datos.estudiantes[indice].momento = valor;
+            guardarDatos(datos);
             const color = calcularSemaforo(datos.estudiantes[indice]);
             const textos = { 
                 verde: 'VERDE - Al corriente', 
@@ -322,7 +350,20 @@
             };
             document.getElementById(`semaforo-fila-${indice}`).innerHTML = 
                 `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
-            
+            mostrarNotificacion('Momento actualizado y semáforo recalculado', 'exito');
+        }
+
+        function actualizarMateriaEnTabla(indice, valor) {
+            datos.estudiantes[indice].materiasAcreditadas = parseInt(valor) || 0;
+            guardarDatos(datos);
+            const color = calcularSemaforo(datos.estudiantes[indice]);
+            const textos = { 
+                verde: 'VERDE - Al corriente', 
+                amarillo: 'AMARILLO - Rezago leve', 
+                rojo: 'ROJO - Rezago grave' 
+            };
+            document.getElementById(`semaforo-fila-${indice}`).innerHTML = 
+                `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
             mostrarNotificacion('Materias actualizadas y semáforo recalculado', 'exito');
         }
 
@@ -386,9 +427,13 @@
             const est = datos.estudiantes[datos.indiceActual];
             document.getElementById('titulo-registro').textContent = `📝 Registro: ${est.nombre} (${est.semestre} semestre)`;
             
-            const meta = metasSemestre[est.semestre] || 38;
+            document.getElementById('momento-evaluacion').value = est.momento;
             document.getElementById('materias-acreditadas').value = est.materiasAcreditadas;
-            document.getElementById('meta-materias').textContent = `Meta mínima esperada para ${est.semestre}: ${meta} materias. (Rango ideal: ${meta} a ${meta + 2})`;
+            
+            const criterios = criteriosSemafaro[est.semestre][est.momento];
+            document.getElementById('meta-materias').textContent = 
+                `Criterios para ${est.semestre} (${est.momento === 'inicio' ? 'inicio' : 'final'} de semestre): ` +
+                `Verde: ${criterios.verde[0]}-${criterios.verde[1]} | Amarillo: ${criterios.amarillo[0]}-${criterios.amarillo[1]} | Rojo: ≤${criterios.rojo[1]}`;
 
             const contAsist = document.getElementById('contenedor-asistencias');
             contAsist.innerHTML = '';
@@ -431,23 +476,23 @@
 
         function actualizarSemaforo() {
             const est = datos.estudiantes[datos.indiceActual];
+            est.momento = document.getElementById('momento-evaluacion').value;
             est.materiasAcreditadas = parseInt(document.getElementById('materias-acreditadas').value) || 0;
             const color = calcularSemaforo(est);
             document.getElementById('semaforo-display').className = `semaforo semaforo-${color}`;
             
-            const meta = metasSemestre[est.semestre] || 38;
-            const porcentaje = Math.round((est.materiasAcreditadas / meta) * 100);
-            
+            const criterios = criteriosSemafaro[est.semestre][est.momento];
             let mensaje = '';
-            if (color === 'verde') mensaje = `Al corriente (${porcentaje}% de la meta)`;
-            else if (color === 'amarillo') mensaje = `Rezago leve (${porcentaje}% de la meta). Requiere seguimiento.`;
-            else mensaje = `Rezago grave (${porcentaje}% de la meta). Intervención urgente.`;
+            if (color === 'verde') mensaje = `Al corriente (${est.materiasAcreditadas} materias)`;
+            else if (color === 'amarillo') mensaje = `Rezago leve (${est.materiasAcreditadas} materias). Requiere seguimiento.`;
+            else mensaje = `Rezago grave (${est.materiasAcreditadas} materias). Intervención urgente.`;
             
             document.getElementById('semaforo-display').innerHTML = `<span class="punto"></span> ${color.toUpperCase()} - ${mensaje}`;
         }
 
         function guardarRegistro() {
             const est = datos.estudiantes[datos.indiceActual];
+            est.momento = document.getElementById('momento-evaluacion').value;
             est.materiasAcreditadas = parseInt(document.getElementById('materias-acreditadas').value) || 0;
             est.riesgo = document.getElementById('select-riesgo').value;
             est.descripcionRiesgo = document.getElementById('descripcion-riesgo').value;
@@ -472,19 +517,17 @@
             tbody.innerHTML = '';
             datos.estudiantes.forEach(est => {
                 const semaforo = calcularSemaforo(est);
-                const meta = metasSemestre[est.semestre] || 38;
-                const porcentaje = Math.round((est.materiasAcreditadas / meta) * 100);
                 const asistencias = est.asistencias.filter(a => a === true).length;
                 const riesgoTexto = est.riesgo === 'si' ? '⚠️ Sí' : '✅ No';
                 const canalTexto = est.canalizacion === 'no' ? '—' : est.canalizacion.charAt(0).toUpperCase() + est.canalizacion.slice(1).replace('-', ' ');
+                const momentoTexto = est.momento === 'inicio' ? 'Inicio' : 'Final';
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${est.nombre}</strong></td>
                     <td>${est.semestre}</td>
+                    <td>${momentoTexto}</td>
                     <td>${est.materiasAcreditadas}</td>
-                    <td>${meta}</td>
-                    <td>${porcentaje}%</td>
                     <td>${asistencias} / ${est.sesiones.length}</td>
                     <td>${riesgoTexto}</td>
                     <td>${canalTexto}</td>
