@@ -98,15 +98,24 @@
 
     <div id="pantalla-principal" class="pantalla">
         <div class="tarjeta">
-            <h2> Mis Tutorados</h2>
-            <p style="margin-bottom:15px; color:#7f8c8d;">Selecciona un estudiante para registrar seguimiento, o inicia una nueva planeación.</p>
+            <h2>📋 Mis Tutorados</h2>
+            <p style="margin-bottom:15px; color:#7f8c8d;">Escribe el número de materias acreditadas para actualizar el semáforo automáticamente, o entra a "Detalles" para más información.</p>
             <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
                 <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-planeacion')">➕ Nueva Planeación</button>
                 <button class="btn btn-exito" onclick="mostrarPantalla('pantalla-resumen')">📊 Ver Resumen General</button>
             </div>
             <div class="tabla-container">
                 <table>
-                    <thead><tr><th>Estudiante</th><th>Semestre</th><th>Materias Acreditadas</th><th>Asistencia</th><th>Semáforo Académico</th><th>Acciones</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Semestre</th>
+                            <th>Materias Acreditadas</th>
+                            <th>Asistencia</th>
+                            <th>Semáforo Académico</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
                     <tbody id="tabla-tutorados"></tbody>
                 </table>
             </div>
@@ -142,7 +151,7 @@
         <div class="tarjeta">
             <h2 id="titulo-registro">📝 Registro de Seguimiento</h2>
             
-            <h3>📚 Situación Académica (Criterio de semáforo)</h3>
+            <h3>📚 Situación Académica</h3>
             <div class="form-grupo">
                 <label>Materias acreditadas hasta el momento:</label>
                 <input type="number" id="materias-acreditadas" min="0" max="50" onchange="actualizarSemaforo()">
@@ -272,23 +281,49 @@
             return `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
         }
 
+        // FUNCIÓN ACTUALIZADA: Campo editable directamente en la tabla principal
         function renderizarTablaPrincipal() {
             const tbody = document.getElementById('tabla-tutorados');
             tbody.innerHTML = '';
             datos.estudiantes.forEach((est, idx) => {
                 const semaforo = calcularSemaforo(est);
                 const asistencias = est.asistencias.filter(a => a === true).length;
+                
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${est.nombre}</strong></td>
                     <td>${est.semestre}</td>
-                    <td>${est.materiasAcreditadas}</td>
+                    <td>
+                        <input type="number" 
+                               value="${est.materiasAcreditadas}" 
+                               min="0" max="50" 
+                               style="width: 70px; padding: 6px; border: 1px solid #bdc3c7; border-radius: 4px; text-align: center; font-weight: bold;"
+                               onchange="actualizarMateriaEnTabla(${idx}, this.value)">
+                    </td>
                     <td>${asistencias} / ${est.sesiones.length}</td>
-                    <td>${renderizarSemaforoHTML(semaforo)}</td>
-                    <td><button class="btn btn-primario" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirRegistro(${idx})">Registrar</button></td>
+                    <td id="semaforo-fila-${idx}">${renderizarSemaforoHTML(semaforo)}</td>
+                    <td><button class="btn btn-primario" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirRegistro(${idx})">Detalles</button></td>
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        // Nueva función para actualizar el dato y el semáforo desde la tabla principal
+        function actualizarMateriaEnTabla(indice, valor) {
+            datos.estudiantes[indice].materiasAcreditadas = parseInt(valor) || 0;
+            guardarDatos(datos); // Guarda el cambio inmediatamente
+            
+            // Recalcula y actualiza visualmente el semáforo de esa fila sin recargar
+            const color = calcularSemaforo(datos.estudiantes[indice]);
+            const textos = { 
+                verde: 'VERDE - Al corriente', 
+                amarillo: 'AMARILLO - Rezago leve', 
+                rojo: 'ROJO - Rezago grave' 
+            };
+            document.getElementById(`semaforo-fila-${indice}`).innerHTML = 
+                `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
+            
+            mostrarNotificacion('Materias actualizadas y semáforo recalculado', 'exito');
         }
 
         let contadorSesiones = 0;
