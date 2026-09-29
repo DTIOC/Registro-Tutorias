@@ -18,7 +18,7 @@
         header .usuario-info { font-size: 0.85rem; opacity: 0.9; margin-right: 15px; }
         .btn-cerrar { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 6px 16px; border-radius: var(--radio); cursor: pointer; font-size: 0.85rem; transition: background 0.2s; }
         .btn-cerrar:hover { background: rgba(255,255,255,0.3); }
-        .pantalla { display: none; max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .pantalla { display: none; max-width: 1100px; margin: 30px auto; padding: 0 20px; }
         .pantalla.activa { display: block; }
         .tarjeta { background: var(--blanco); border-radius: var(--radio); box-shadow: var(--sombra); padding: 30px; margin-bottom: 20px; }
         .tarjeta h2 { color: var(--azul-primario); margin-bottom: 20px; font-size: 1.4rem; border-bottom: 2px solid var(--azul-claro); padding-bottom: 10px; }
@@ -106,7 +106,7 @@
                 <button class="btn btn-exito" onclick="mostrarPantalla('pantalla-resumen')">📊 Ver Resumen General</button>
             </div>
             <div class="info-criterios">
-                <strong>📌 Criterios del Semáforo:</strong><br>
+                <strong> Criterios del Semáforo:</strong><br>
                 <strong>1° semestre:</strong> Verde: 5-6 materias | Amarillo: 3-4 | Rojo: ≤2<br>
                 <strong>2° semestre:</strong> Verde: 11-12 | Amarillo: 9-10 | Rojo: ≤8<br>
                 <strong>3° semestre:</strong> Verde: 17-18 | Amarillo: 15-16 | Rojo: ≤14<br>
@@ -145,7 +145,7 @@
                     <div class="icono">👤</div><h3>Individual</h3><p>Sesión personalizada con un estudiante</p>
                 </div>
                 <div class="tipo-opcion" id="tipo-grupal" onclick="seleccionarTipo('grupal')">
-                    <div class="icono"></div><h3>Grupal</h3><p>Sesión grupal con todos los tutorados</p>
+                    <div class="icono">👥</div><h3>Grupal</h3><p>Sesión grupal con todos los tutorados</p>
                 </div>
             </div>
             <h3>Paso 2: Registrar sesiones</h3>
@@ -162,7 +162,7 @@
         <div class="tarjeta">
             <h2 id="titulo-registro">📝 Registro de Seguimiento</h2>
             
-            <h3>📚 Situación Académica</h3>
+            <h3> Situación Académica</h3>
             <div class="form-grupo">
                 <label>Momento de evaluación:</label>
                 <select id="momento-evaluacion" onchange="actualizarSemaforo()">
@@ -234,10 +234,10 @@
 
     <div id="pantalla-resumen" class="pantalla">
         <div class="tarjeta">
-            <h2>📊 Resumen General de Tutorados</h2>
+            <h2> Resumen General de Tutorados</h2>
             <div class="btn-grupo" style="margin-top:0; margin-bottom:20px;">
                 <button class="btn btn-primario" onclick="mostrarPantalla('pantalla-principal')">← Volver al listado</button>
-                <button class="btn btn-peligro" onclick="reiniciarDatos()">️ Reiniciar datos de prueba</button>
+                <button class="btn btn-peligro" onclick="reiniciarDatos()">🗑️ Reiniciar datos de prueba</button>
             </div>
             <div class="tabla-container">
                 <table>
@@ -250,7 +250,7 @@
 
     <script>
         // Criterios exactos del semáforo por semestre y momento
-        const criteriosSemafaro = {
+        const criteriosSemaforo = {
             "1°": { inicio: { verde: [5, 6], amarillo: [3, 4], rojo: [0, 2] }, final: { verde: [5, 6], amarillo: [3, 4], rojo: [0, 2] } },
             "2°": { inicio: { verde: [5, 6], amarillo: [3, 4], rojo: [0, 2] }, final: { verde: [11, 12], amarillo: [9, 10], rojo: [0, 8] } },
             "3°": { inicio: { verde: [11, 12], amarillo: [9, 10], rojo: [0, 8] }, final: { verde: [17, 18], amarillo: [15, 16], rojo: [0, 14] } },
@@ -270,9 +270,22 @@
             indiceActual: 0
         };
 
+        // Función mejorada: detecta datos viejos y los reinicia automáticamente
         function cargarDatos() {
             const guardados = localStorage.getItem('sgie_prototipo_datos');
-            return guardados ? JSON.parse(guardados) : JSON.parse(JSON.stringify(datosIniciales));
+            if (guardados) {
+                try {
+                    const datosParseados = JSON.parse(guardados);
+                    if (datosParseados.estudiantes && datosParseados.estudiantes[0] && datosParseados.estudiantes[0].momento !== undefined) {
+                        return datosParseados;
+                    }
+                    console.log('Datos antiguos detectados, reiniciando...');
+                } catch (e) {
+                    console.log('Error al leer datos, reiniciando...');
+                }
+            }
+            localStorage.removeItem('sgie_prototipo_datos');
+            return JSON.parse(JSON.stringify(datosIniciales));
         }
         function guardarDatos(datos) { localStorage.setItem('sgie_prototipo_datos', JSON.stringify(datos)); }
         let datos = cargarDatos();
@@ -289,12 +302,11 @@
         function cerrarSesion() { mostrarPantalla('pantalla-login'); }
 
         function calcularSemaforo(estudiante) {
-            const criterios = criteriosSemafaro[estudiante.semestre][estudiante.momento];
+            const criterios = criteriosSemaforo[estudiante.semestre][estudiante.momento];
             const materias = estudiante.materiasAcreditadas;
             
             if (materias >= criterios.verde[0] && materias <= criterios.verde[1]) return 'verde';
             if (materias >= criterios.amarillo[0] && materias <= criterios.amarillo[1]) return 'amarillo';
-            if (materias >= criterios.rojo[0] && materias <= criterios.rojo[1]) return 'rojo';
             return 'rojo';
         }
 
@@ -307,6 +319,7 @@
             return `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
         }
 
+        // Función corregida: IDs únicos y addEventListener
         function renderizarTablaPrincipal() {
             const tbody = document.getElementById('tabla-tutorados');
             tbody.innerHTML = '';
@@ -319,52 +332,76 @@
                     <td><strong>${est.nombre}</strong></td>
                     <td>${est.semestre}</td>
                     <td>
-                        <select onchange="actualizarMomentoEnTabla(${idx}, this.value)" style="padding: 5px; border: 1px solid #bdc3c7; border-radius: 4px;">
+                        <select id="momento-${idx}" style="padding: 5px; border: 1px solid #bdc3c7; border-radius: 4px;">
                             <option value="inicio" ${est.momento === 'inicio' ? 'selected' : ''}>Inicio</option>
                             <option value="final" ${est.momento === 'final' ? 'selected' : ''}>Final</option>
                         </select>
                     </td>
                     <td>
                         <input type="number" 
+                               id="materias-${idx}"
                                value="${est.materiasAcreditadas}" 
                                min="0" max="50" 
-                               style="width: 70px; padding: 6px; border: 1px solid #bdc3c7; border-radius: 4px; text-align: center; font-weight: bold;"
-                               onchange="actualizarMateriaEnTabla(${idx}, this.value)">
+                               style="width: 70px; padding: 6px; border: 1px solid #bdc3c7; border-radius: 4px; text-align: center; font-weight: bold;">
                     </td>
                     <td>${asistencias} / ${est.sesiones.length}</td>
                     <td id="semaforo-fila-${idx}">${renderizarSemaforoHTML(semaforo)}</td>
                     <td><button class="btn btn-primario" style="padding:6px 14px; font-size:0.8rem;" onclick="abrirRegistro(${idx})">Detalles</button></td>
                 `;
                 tbody.appendChild(tr);
+                
+                // Agregar eventos al input de materias
+                const inputMaterias = document.getElementById(`materias-${idx}`);
+                inputMaterias.addEventListener('change', function() {
+                    actualizarMateriaEnTabla(idx, this.value);
+                });
+                inputMaterias.addEventListener('blur', function() {
+                    actualizarMateriaEnTabla(idx, this.value);
+                });
+                
+                // Agregar evento al selector de momento
+                const selectMomento = document.getElementById(`momento-${idx}`);
+                selectMomento.addEventListener('change', function() {
+                    actualizarMomentoEnTabla(idx, this.value);
+                });
             });
+        }
+
+        function actualizarMateriaEnTabla(indice, valor) {
+            const nuevoValor = parseInt(valor) || 0;
+            datos.estudiantes[indice].materiasAcreditadas = nuevoValor;
+            guardarDatos(datos);
+            
+            const color = calcularSemaforo(datos.estudiantes[indice]);
+            const textos = { 
+                verde: 'VERDE - Al corriente', 
+                amarillo: 'AMARILLO - Rezago leve', 
+                rojo: 'ROJO - Rezago grave' 
+            };
+            const celdaSemaforo = document.getElementById(`semaforo-fila-${indice}`);
+            if (celdaSemaforo) {
+                celdaSemaforo.innerHTML = `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
+            }
+            
+            mostrarNotificacion('Materias actualizadas y semáforo recalculado', 'exito');
         }
 
         function actualizarMomentoEnTabla(indice, valor) {
             datos.estudiantes[indice].momento = valor;
             guardarDatos(datos);
+            
             const color = calcularSemaforo(datos.estudiantes[indice]);
             const textos = { 
                 verde: 'VERDE - Al corriente', 
                 amarillo: 'AMARILLO - Rezago leve', 
                 rojo: 'ROJO - Rezago grave' 
             };
-            document.getElementById(`semaforo-fila-${indice}`).innerHTML = 
-                `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
+            const celdaSemaforo = document.getElementById(`semaforo-fila-${indice}`);
+            if (celdaSemaforo) {
+                celdaSemaforo.innerHTML = `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
+            }
+            
             mostrarNotificacion('Momento actualizado y semáforo recalculado', 'exito');
-        }
-
-        function actualizarMateriaEnTabla(indice, valor) {
-            datos.estudiantes[indice].materiasAcreditadas = parseInt(valor) || 0;
-            guardarDatos(datos);
-            const color = calcularSemaforo(datos.estudiantes[indice]);
-            const textos = { 
-                verde: 'VERDE - Al corriente', 
-                amarillo: 'AMARILLO - Rezago leve', 
-                rojo: 'ROJO - Rezago grave' 
-            };
-            document.getElementById(`semaforo-fila-${indice}`).innerHTML = 
-                `<span class="semaforo semaforo-${color}"><span class="punto"></span> ${textos[color]}</span>`;
-            mostrarNotificacion('Materias actualizadas y semáforo recalculado', 'exito');
         }
 
         let contadorSesiones = 0;
@@ -425,12 +462,12 @@
 
         function renderizarRegistro() {
             const est = datos.estudiantes[datos.indiceActual];
-            document.getElementById('titulo-registro').textContent = `📝 Registro: ${est.nombre} (${est.semestre} semestre)`;
+            document.getElementById('titulo-registro').textContent = ` Registro: ${est.nombre} (${est.semestre} semestre)`;
             
             document.getElementById('momento-evaluacion').value = est.momento;
             document.getElementById('materias-acreditadas').value = est.materiasAcreditadas;
             
-            const criterios = criteriosSemafaro[est.semestre][est.momento];
+            const criterios = criteriosSemaforo[est.semestre][est.momento];
             document.getElementById('meta-materias').textContent = 
                 `Criterios para ${est.semestre} (${est.momento === 'inicio' ? 'inicio' : 'final'} de semestre): ` +
                 `Verde: ${criterios.verde[0]}-${criterios.verde[1]} | Amarillo: ${criterios.amarillo[0]}-${criterios.amarillo[1]} | Rojo: ≤${criterios.rojo[1]}`;
@@ -481,7 +518,6 @@
             const color = calcularSemaforo(est);
             document.getElementById('semaforo-display').className = `semaforo semaforo-${color}`;
             
-            const criterios = criteriosSemafaro[est.semestre][est.momento];
             let mensaje = '';
             if (color === 'verde') mensaje = `Al corriente (${est.materiasAcreditadas} materias)`;
             else if (color === 'amarillo') mensaje = `Rezago leve (${est.materiasAcreditadas} materias). Requiere seguimiento.`;
